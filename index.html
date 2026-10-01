@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Comparative Analysis of Pattern Recognition Techniques</title><meta name="description" content="Classification vs clustering on the Iris dataset: metrics, charts and an interactive playground.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0B1020;--b:#4F9DFF;--p:#7C4DFF;--c:#00E5FF;--t:#fff;--m:#a9b4cc;--g:rgba(255,255,255,.06);--gb:rgba(255,255,255,.12);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#0B1020}}
+html{scroll-behavior:smooth;scroll-padding-top:70px}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:16px/1.6 Inter,system-ui,-apple-system,Segoe UI,sans-serif;overflow-x:hidden}
+h1,h2,h3{font-family:Poppins,Inter,system-ui,sans-serif;line-height:1.15;margin:0 0 .5em}
+.grad{background:linear-gradient(90deg,var(--b),var(--p),var(--c));-webkit-background-clip:text;background-clip:text;color:transparent}
+section{padding:80px 20px;max-width:1150px;margin:auto;position:relative}
+h2{font-size:clamp(1.7rem,4vw,2.5rem)}.sub{color:var(--m);max-width:680px;margin-bottom:32px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--g);border:1px solid var(--gb);border-radius:18px;padding:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .3s,border-color .3s,box-shadow .3s}
+.card:hover{border-color:var(--b);box-shadow:0 10px 40px rgba(79,157,255,.18);transform:translateY(-4px)}
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s,transform .8s}.rv.in{opacity:1;transform:none}
+nav{position:fixed;top:0;left:0;right:0;z-index:50;padding:calc(10px + env(safe-area-inset-top,0px)) 20px 10px;display:flex;justify-content:space-between;align-items:center;background:rgba(11,16,32,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--gb)}
+nav b{font-size:.95rem}nav div{display:flex;gap:16px;font-size:.85rem}nav a{color:var(--m);text-decoration:none}nav a:hover{color:var(--c)}
+@media(max-width:760px){nav div{display:none}}
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--b),var(--c));z-index:60}
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;max-width:none;overflow:hidden}
+#net{position:absolute;inset:0;width:100%;height:100%}
+#hero>*:not(canvas){position:relative;z-index:2}
+#hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(124,77,255,.35),transparent 50%),radial-gradient(circle at 75% 70%,rgba(0,229,255,.2),transparent 50%);animation:dg 12s ease-in-out infinite alternate}
+@keyframes dg{to{transform:scale(1.25) rotate(6deg)}}
+h1{font-size:clamp(2.1rem,6vw,4.2rem);max-width:900px}
+.btn{display:inline-block;padding:13px 26px;border-radius:999px;font-weight:600;text-decoration:none;color:#fff;border:1px solid var(--gb);margin:6px;cursor:pointer;background:var(--g);font-size:1rem;transition:transform .2s}
+.btn:hover{transform:scale(1.05)}.btn.pr{background:linear-gradient(90deg,var(--b),var(--p));border:0}
+.num{font-size:2.2rem;font-weight:700}.lbl{color:var(--m);font-size:.85rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--gb)}th{color:var(--c);cursor:pointer}
+.tw{overflow-x:auto}
+details summary{cursor:pointer;color:var(--b);font-size:.9rem;margin-top:10px}details p{color:var(--m);font-size:.9rem;margin:.5em 0}
+.tag{display:inline-block;font-size:.75rem;padding:2px 10px;border-radius:99px;background:rgba(79,157,255,.15);color:var(--b);margin-right:6px}
+.cv{position:relative;height:300px}
+.tabs button{margin:3px}.tabs .on{background:linear-gradient(90deg,var(--b),var(--p));border:0}
+.tl{border-left:2px solid var(--gb);margin-left:10px;padding-left:24px}.tl .card{margin-bottom:14px;position:relative}.tl .card:before{content:"";position:absolute;left:-34px;top:26px;width:12px;height:12px;border-radius:50%;background:var(--c);box-shadow:0 0 14px var(--c)}
+input,textarea,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--gb);background:rgba(255,255,255,.05);color:#fff;font:inherit;margin-bottom:6px}
+select option{color:#000}.err{color:#ff7b8a;font-size:.8rem;min-height:1.2em;display:block}
+input[type=range]{padding:0;accent-color:var(--c)}
+#cur{position:fixed;width:22px;height:22px;border:2px solid var(--c);border-radius:50%;pointer-events:none;z-index:70;transform:translate(-50%,-50%);transition:width .2s,height .2s;display:none}
+@media(hover:hover) and (pointer:fine){#cur{display:block}}
+#top{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border-radius:50%;border:1px solid var(--gb);background:var(--g);color:#fff;backdrop-filter:blur(10px);cursor:pointer;opacity:0;pointer-events:none;transition:.3s;z-index:50}
+#top.show{opacity:1;pointer-events:auto}
+#load{position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;transition:opacity .6s}
+#load i{width:50px;height:50px;border:3px solid var(--gb);border-top-color:var(--c);border-radius:50%;animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+footer{border-top:1px solid var(--gb);padding:40px 20px;text-align:center;color:var(--m);font-size:.9rem}footer a{color:var(--m);margin:0 8px}
+.tech span{display:inline-block;margin:6px;padding:12px 18px;border-radius:14px;background:var(--g);border:1px solid var(--gb);animation:fl 4s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-8px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style></head><body>
+<div id="load"><i></i></div><div id="bar"></div><div id="cur"></div>
+<nav><b class="grad">PatternRec.AI</b><div><a href="#about">About</a><a href="#dataset">Dataset</a><a href="#clf">Classification</a><a href="#clu">Clustering</a><a href="#dash">Dashboard</a><a href="#play">Playground</a><a href="#res">Results</a><a href="#contact">Contact</a></div></nav>
+
+<section id="hero"><canvas id="net"></canvas>
+<span class="tag">AI / ML Research Project</span>
+<h1 class="grad">Comparative Analysis of Pattern Recognition Techniques</h1>
+<p style="font-size:1.2rem;color:var(--c)">Comparative Analysis of Classification and Clustering Algorithms</p>
+<p class="sub">Nine algorithms, one dataset. We evaluate supervised and unsupervised methods on Iris using statistical metrics, interactive charts and a live playground.</p>
+<div><a class="btn pr" href="#clf">Explore Analysis</a><a class="btn" href="#dash">View Results</a></div></section>
+
+<section id="about"><h2 class="rv">About the <span class="grad">Project</span></h2><p class="sub rv">Pattern recognition finds structure in data so machines can categorize, group and predict.</p>
+<div class="grid">
+<div class="card rv"><h3>🧠 What is it?</h3><p class="lbl">Automatically discovering regularities in data and using them to assign labels (classification) or discover groups (clustering).</p></div>
+<div class="card rv"><h3>⚡ Why it matters</h3><p class="lbl">It underpins modern AI: vision, speech, recommendation, anomaly detection and decision support.</p></div>
+<div class="card rv"><h3>🎯 Classification vs Clustering</h3><p class="lbl">Classification learns from labeled examples. Clustering finds natural groups without labels. Comparing both reveals how much labels help.</p></div>
+<div class="card rv"><h3>🌍 Applications</h3><p class="lbl">Medical diagnosis, fraud detection, customer segmentation, handwriting and face recognition, species identification.</p></div></div></section>
+
+<section id="dataset"><h2 class="rv">The <span class="grad">Dataset</span></h2><p class="sub rv">Fisher's Iris dataset: a classic benchmark with three flower species and four measurements.</p>
+<div class="grid" style="margin-bottom:20px"><div class="card rv"><div class="num grad" data-n="150">0</div><div class="lbl">Samples</div></div><div class="card rv"><div class="num grad" data-n="4">0</div><div class="lbl">Features</div></div><div class="card rv"><div class="num grad" data-n="3">0</div><div class="lbl">Classes (50 each)</div></div><div class="card rv"><div class="num grad" data-n="0">0</div><div class="lbl">Missing values</div></div></div>
+<div class="grid"><div class="card rv tw"><h3>Feature summary</h3><table id="stats"></table></div><div class="card rv"><h3>Class distribution</h3><div class="cv"><canvas id="dist"></canvas></div></div></div>
+<div class="card rv tw" style="margin-top:18px"><h3>Sample rows <small class="lbl">(click a header to sort)</small></h3><table id="tbl"></table></div></section>
+
+<section id="clf"><h2 class="rv">Classification <span class="grad">Algorithms</span></h2><p class="sub rv">Supervised learners trained on labeled data. Accuracy shown from a 70/30 split (illustrative values).</p><div class="grid" id="clfg"></div></section>
+<section id="clu"><h2 class="rv">Clustering <span class="grad">Algorithms</span></h2><p class="sub rv">Unsupervised methods that group samples without seeing labels.</p><div class="grid" id="clug"></div></section>
+
+<section id="dash"><h2 class="rv">Comparative <span class="grad">Dashboard</span></h2><p class="sub rv">Switch the view to compare models. Values are illustrative of typical Iris results.</p>
+<div class="tabs rv" id="tabs"></div>
+<div class="grid"><div class="card"><div class="cv"><canvas id="c1"></canvas></div></div><div class="card"><div class="cv"><canvas id="c2"></canvas></div></div></div>
+<div class="grid" style="margin-top:18px"><div class="card"><h3>Confusion matrix (Random Forest)</h3><div id="cm"></div></div><div class="card tw"><h3>Metric heatmap</h3><div id="hm"></div></div></div></section>
+
+<section id="play"><h2 class="rv">Algorithm <span class="grad">Playground</span></h2><p class="sub rv">Runs live in your browser on Iris-like data (petal length vs width).</p>
+<div class="grid"><div class="card"><label>Algorithm</label><select id="alg"><option value="km">K-Means (clustering)</option><option value="knn">KNN (classification)</option></select><label id="kl">k = 3</label><input type="range" id="k" min="1" max="10" value="3"><button class="btn pr" id="run">Run simulation</button>
+<div class="grid" style="margin-top:14px"><div><div class="num grad" id="m1">-</div><div class="lbl" id="l1"></div></div><div><div class="num grad" id="m2">-</div><div class="lbl" id="l2"></div></div></div></div>
+<div class="card"><div class="cv"><canvas id="sc"></canvas></div></div></div></section>
+
+<section id="flow"><h2 class="rv">Project <span class="grad">Workflow</span></h2><div class="tl" id="tl"></div></section>
+
+<section id="res"><h2 class="rv">Results &amp; <span class="grad">Findings</span></h2>
+<div class="grid"><div class="card rv"><span class="tag">Best classifier</span><h3>SVM</h3><div class="num grad" data-n="98" data-s="%">0</div><p class="lbl">Highest accuracy with a smooth RBF boundary between versicolor and virginica.</p></div>
+<div class="card rv"><span class="tag">Best clustering</span><h3>K-Means / GMM</h3><div class="num grad" data-n="55" data-s="">0</div><p class="lbl">Silhouette ×100. Setosa separates perfectly; the other two overlap.</p></div>
+<div class="card rv"><span class="tag">Observation</span><h3>Labels help</h3><p class="lbl">Supervised models beat clustering agreement with true species, especially on overlapping classes.</p></div>
+<div class="card rv"><span class="tag">Insight</span><h3>Petal features win</h3><p class="lbl">Petal length and width carry most of the class signal across all models.</p></div></div></section>
+
+<section id="tech"><h2 class="rv">AI <span class="grad">Technology</span></h2><div class="tech rv"><span>🐍 Python</span><span>🔬 Scikit-learn</span><span>🐼 Pandas</span><span>🔢 NumPy</span><span>📈 Matplotlib</span><span>🎨 Seaborn</span><span>🧮 TensorFlow</span><span>🤖 Machine Learning</span></div></section>
+
+<section id="future"><h2 class="rv">Future <span class="grad">Scope</span></h2><div class="grid"><div class="card rv"><h3>Deep Learning</h3><p class="lbl">Neural models for richer feature learning.</p></div><div class="card rv"><h3>CNN Classification</h3><p class="lbl">Extend to image-based pattern data.</p></div><div class="card rv"><h3>Hybrid Clustering</h3><p class="lbl">Combine density and model-based grouping.</p></div><div class="card rv"><h3>Real-Time Analytics</h3><p class="lbl">Stream data into live dashboards.</p></div><div class="card rv"><h3>AutoML</h3><p class="lbl">Automate model and hyperparameter selection.</p></div></div></section>
+
+<section id="team"><h2 class="rv">Student <span class="grad">Information</span></h2><div class="card rv" style="max-width:520px"><div style="font-size:3rem">🎓</div><h3>Aaditya Gudhniye</h3><p class="lbl">Roll Number: [Roll No.]<br>Department: AIML<br>Topic: Pattern Recognition<br>College: SB Jain</p></div></section>
+
+<section id="contact"><h2 class="rv">Get in <span class="grad">Touch</span></h2><div class="grid"><form class="card" id="f" novalidate><input id="fn" placeholder="Your name"><span class="err"></span><input id="fe" type="email" placeholder="Email"><span class="err"></span><textarea id="fm" rows="4" placeholder="Message"></textarea><span class="err"></span><button class="btn pr" type="submit">Send message</button><p id="ok" class="lbl"></p></form>
+<div class="card"><h3>Reach out</h3><p class="lbl"><a id="lmail" href="#">📧 Email</a><br><a id="lin" href="#" target="_blank" rel="noopener">🔗 LinkedIn</a><br><a id="lgh" href="#" target="_blank" rel="noopener">💻 GitHub</a></p></div></div></section>
+
+<footer><p><b class="grad">PatternRec.AI</b></p><p><a href="#about">About</a><a href="#dataset">Dataset</a><a href="#dash">Dashboard</a><a href="#play">Playground</a></p><p>Python · Scikit-learn · Pandas · NumPy · Matplotlib · Seaborn</p><p>© 2026 Comparative Analysis of Pattern Recognition Techniques</p></footer>
+<button id="top" aria-label="Back to top">↑</button>
+
+<script>
+const CFG={email:'aadityagudhniye@gmail.com',linkedin:'https://www.linkedin.com/',github:'https://github.com/Aadi-777/FML-TAE-1'};
+const $=s=>document.querySelector(s),B='#4F9DFF',P='#7C4DFF',C='#00E5FF',tc='#a9b4cc',gr='rgba(255,255,255,.08)';
+Chart.defaults.color=tc;Chart.defaults.borderColor=gr;
+addEventListener('load',()=>{$('#load').style.opacity=0;setTimeout(()=>$('#load').remove(),600)});
+// seeded RNG + Iris-like data
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647,gs=(m,s)=>m+s*Math.sqrt(-2*Math.log(rnd()+1e-9))*Math.cos(6.283*rnd());
+const SP=['Setosa','Versicolor','Virginica'],cen=[[5.0,3.4,1.5,.25],[5.9,2.8,4.3,1.3],[6.6,3.0,5.55,2.0]],sd=[[.35,.38,.17,.1],[.5,.31,.47,.2],[.63,.32,.55,.27]];
+const D=[];SP.forEach((s,c)=>{for(let i=0;i<50;i++)D.push({c,f:cen[c].map((m,j)=>+gs(m,sd[c][j]).toFixed(1))})});
+const FN=['Sepal length','Sepal width','Petal length','Petal width'];
+$('#stats').innerHTML='<tr><th>Feature</th><th>Mean</th><th>Std</th><th>Min</th><th>Max</th></tr>'+FN.map((n,j)=>{const v=D.map(d=>d.f[j]),m=v.reduce((a,b)=>a+b)/150,s=Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/150);return`<tr><td>${n}</td><td>${m.toFixed(2)}</td><td>${s.toFixed(2)}</td><td>${Math.min(...v)}</td><td>${Math.max(...v)}</td></tr>`}).join('');
+function tbl(rows){$('#tbl').innerHTML='<tr>'+['#',...FN,'Species'].map((h,i)=>`<th data-i="${i}">${h}</th>`).join('')+'</tr>'+rows.map((d,i)=>`<tr><td>${d.i}</td>${d.f.map(x=>`<td>${x}</td>`).join('')}<td>${SP[d.c]}</td></tr>`).join('')}
+D.forEach((d,i)=>d.i=i+1);let rows=[0,1,2].flatMap(c=>D.filter(d=>d.c==c).slice(0,4));tbl(rows);
+$('#tbl').onclick=e=>{const i0=e.target.dataset.i;if(i0==null)return;const i=+i0;rows.sort((a,b)=>i==0?a.i-b.i:i==5?a.c-b.c:a.f[i-1]-b.f[i-1]);tbl(rows)};
+new Chart($('#dist'),{type:'doughnut',data:{labels:SP,datasets:[{data:[50,50,50],backgroundColor:[B,P,C],borderWidth:0}]},options:{maintainAspectRatio:false}});
+// algorithms
+const CL=[['Decision Tree',.93,'Splits data on feature thresholds into a tree of rules.','Interpretable, no scaling needed','Overfits easily','Credit scoring, diagnosis'],['Random Forest',.97,'Averages many randomized trees.','Robust, handles noise','Less interpretable, heavier','Fraud, bioinformatics'],['SVM',.98,'Finds the maximum-margin boundary, with kernels for curves.','Strong in high dimensions','Needs scaling and tuning','Text and image classification'],['KNN',.96,'Labels a sample by its k nearest neighbors.','Simple, no training','Slow on big data','Recommenders, pattern matching'],['Logistic Regression',.96,'Models class probabilities with a linear boundary.','Fast, probabilistic','Linear boundaries only','Risk scoring, baselines']];
+$('#clfg').innerHTML=CL.map(a=>`<div class="card rv"><h3>${a[0]}</h3><div class="num grad">${(a[1]*100).toFixed(0)}%</div><div class="lbl">Accuracy</div><p class="lbl">${a[2]}</p><details><summary>More details</summary><p><b>+</b> ${a[3]}</p><p><b>−</b> ${a[4]}</p><p><b>Use:</b> ${a[5]}</p></details></div>`).join('');
+const CU=[['K-Means','Assigns points to the nearest of k centroids and updates them iteratively.','Fast, scalable','Needs k, assumes round clusters'],['Hierarchical','Builds a dendrogram by merging the closest clusters.','No preset k, rich structure','Slow, sensitive to noise'],['DBSCAN','Grows clusters from dense regions; sparse points become noise.','Arbitrary shapes, finds outliers','Sensitive to eps and min samples'],['Gaussian Mixture','Fits overlapping Gaussians with EM and soft assignments.','Soft membership, elliptical clusters','Can hit local optima']];
+$('#clug').innerHTML=CU.map((a,i)=>`<div class="card rv"><h3>${a[0]}</h3><p class="lbl">${a[1]}</p><p class="lbl"><b>+</b> ${a[2]}<br><b>−</b> ${a[3]}</p><div style="height:150px"><canvas id="cu${i}"></canvas></div></div>`).join('');
+CU.forEach((_,i)=>{const o=[.6,.45,.8,.5][i],ds=[0,1,2].map(c=>({label:SP[c],data:D.filter(d=>d.c==c).map(d=>({x:d.f[2],y:d.f[3]})),backgroundColor:[B,P,C][c],pointRadius:2}));
+ new Chart($('#cu'+i),{type:'scatter',data:{datasets:ds},options:{maintainAspectRatio:false,animation:{duration:1600,delay:i*200},plugins:{legend:{display:false}},scales:{x:{ticks:{display:false}},y:{ticks:{display:false}}}}})});
+// dashboard
+const M={Accuracy:[.93,.97,.98,.96,.96],Precision:[.93,.97,.98,.96,.96],Recall:[.93,.97,.98,.96,.96],'F1 Score':[.93,.97,.98,.96,.96],'Time (ms)':[4,120,6,3,8]};
+const N=CL.map(a=>a[0]),pal=[B,P,C,'#5EEAD4','#F59E0B'];let c1,c2;
+const views={Overview:()=>{const ks=['Accuracy','Precision','Recall','F1 Score'];return{type:'bar',data:{labels:N,datasets:ks.map((k,i)=>({label:k,data:M[k],backgroundColor:pal[i]}))},options:{maintainAspectRatio:false,scales:{y:{min:.85,max:1}}}}},
+Radar:()=>({type:'radar',data:{labels:['Accuracy','Precision','Recall','F1'],datasets:N.map((n,i)=>({label:n,data:[0,1,2,3].map(j=>Object.values(M)[j][i]),borderColor:pal[i],backgroundColor:pal[i]+'22'}))},options:{maintainAspectRatio:false,scales:{r:{min:.9,max:1}}}}),
+Clustering:()=>({type:'bar',data:{labels:['K-Means','Hierarchical','DBSCAN','GMM'],datasets:[{label:'Silhouette (higher is better)',data:[.55,.55,.49,.50],backgroundColor:B},{label:'Davies-Bouldin (lower is better)',data:[.66,.66,.72,.75],backgroundColor:P}]},options:{maintainAspectRatio:false}}),
+Time:()=>({type:'line',data:{labels:N,datasets:[{label:'Execution time (ms)',data:M['Time (ms)'],borderColor:C,backgroundColor:C+'33',fill:true,tension:.4}]},options:{maintainAspectRatio:false}})};
+const sc=()=>({type:'scatter',data:{datasets:[0,1,2].map(c=>({label:SP[c],data:D.filter(d=>d.c==c).map(d=>({x:d.f[0],y:d.f[2]})),backgroundColor:[B,P,C][c]}))},options:{maintainAspectRatio:false,scales:{x:{title:{display:true,text:'Sepal length'}},y:{title:{display:true,text:'Petal length'}}}}});
+function show(v){c1&&c1.destroy();c2&&c2.destroy();c1=new Chart($('#c1'),views[v]());c2=new Chart($('#c2'),sc());document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.textContent==v))}
+$('#tabs').innerHTML=Object.keys(views).map(v=>`<button class="btn">${v}</button>`).join('');$('#tabs').onclick=e=>e.target.tagName=='BUTTON'&&show(e.target.textContent);show('Overview');
+const cmv=[[50,0,0],[0,47,3],[0,1,49]];$('#cm').innerHTML='<table><tr><th></th>'+SP.map(s=>`<th>${s.slice(0,4)}</th>`).join('')+'</tr>'+cmv.map((r,i)=>`<tr><th>${SP[i]}</th>`+r.map(v=>`<td style="background:rgba(79,157,255,${v/55+.04})">${v}</td>`).join('')+'</tr>').join('')+'</table>';
+$('#hm').innerHTML='<table><tr><th></th>'+N.map(n=>`<th>${n.split(' ')[0]}</th>`).join('')+'</tr>'+['Accuracy','F1 Score'].map(k=>`<tr><th>${k}</th>`+M[k].map(v=>`<td style="background:rgba(124,77,255,${(v-.88)*8})">${v.toFixed(2)}</td>`).join('')+'</tr>').join('')+'</table>';
+// workflow
+const W=['Dataset','Preprocessing','Feature Selection','Classification / Clustering','Evaluation','Performance Comparison','Final Insights'];$('#tl').innerHTML=W.map((w,i)=>`<div class="card rv"><b>${i+1}. ${w}</b></div>`).join('');
+// playground
+let sct;const X=D.map(d=>[d.f[2],d.f[3]]);const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+function kmeans(k){let ce=Array.from({length:k},(_,i)=>X[Math.floor(i*150/k)]),lab=[];for(let it=0;it<20;it++){lab=X.map(x=>ce.reduce((b,c,i)=>dist(x,c)<dist(x,ce[b])?i:b,0));ce=ce.map((c,i)=>{const p=X.filter((_,j)=>lab[j]==i);return p.length?[p.reduce((a,x)=>a+x[0],0)/p.length,p.reduce((a,x)=>a+x[1],0)/p.length]:c})}return lab}
+function sil(lab,k){let t=0;X.forEach((x,i)=>{const av=Array(k).fill(0),n=Array(k).fill(0);X.forEach((y,j)=>{if(i!=j){av[lab[j]]+=dist(x,y);n[lab[j]]++}});const a=av[lab[i]]/Math.max(n[lab[i]],1);let b=1e9;for(let c=0;c<k;c++)if(c!=lab[i]&&n[c])b=Math.min(b,av[c]/n[c]);t+=b==1e9?0:(b-a)/Math.max(a,b)});return t/150}
+function run(){const k=+$('#k').value,km=$('#alg').value=='km';let lab,m1,m2;
+ if(km){const kk=Math.max(k,2);lab=kmeans(kk);m1=sil(lab,kk).toFixed(2);m2=kk;$('#l1').textContent='Silhouette score';$('#l2').textContent='Clusters'}
+ else{lab=D.map(d=>d.c);let ok=0,t=0;D.forEach((d,i)=>{if(i%3==0){t++;const nn=X.map((x,j)=>[dist(x,X[i]),j]).filter(q=>q[1]%3!=0).sort((a,b)=>a[0]-b[0]).slice(0,k),v=[0,0,0];nn.forEach(q=>v[D[q[1]].c]++);if(v.indexOf(Math.max(...v))==d.c)ok++}});m1=(ok/t*100).toFixed(1)+'%';m2=k;$('#l1').textContent='Test accuracy';$('#l2').textContent='Neighbors (k)'}
+ $('#m1').textContent=m1;$('#m2').textContent=m2;const cols=[B,P,C,'#5EEAD4','#F59E0B','#F43F5E','#A3E635','#FB923C','#E879F9','#94A3B8'],g={};X.forEach((x,i)=>(g[lab[i]]=g[lab[i]]||[]).push({x:x[0],y:x[1]}));
+ sct&&sct.destroy();sct=new Chart($('#sc'),{type:'scatter',data:{datasets:Object.keys(g).map(c=>({label:'Group '+(+c+1),data:g[c],backgroundColor:cols[c%10]}))},options:{maintainAspectRatio:false,animation:{duration:800},scales:{x:{title:{display:true,text:'Petal length'}},y:{title:{display:true,text:'Petal width'}}}}})}
+$('#k').oninput=e=>$('#kl').textContent='k = '+e.target.value;$('#run').onclick=run;run();
+// form
+$('#f').onsubmit=e=>{e.preventDefault();const f=[$('#fn'),$('#fe'),$('#fm')],r=[v=>v.trim().length>1,v=>/^\S+@\S+\.\S+$/.test(v),v=>v.trim().length>9],m=['Enter your name','Enter a valid email','Message needs 10+ characters'];let ok=1;f.forEach((el,i)=>{const g=r[i](el.value);el.nextElementSibling.textContent=g?'':m[i];if(!g)ok=0});if(!ok){$('#ok').textContent='';return}const body=`Name: ${f[0].value}\nEmail: ${f[1].value}\n\n${f[2].value}`;location.href=`mailto:${CFG.email}?subject=${encodeURIComponent('Portfolio message from '+f[0].value)}&body=${encodeURIComponent(body)}`;$('#ok').textContent='Opening your email app… if nothing opens, your message was copied: paste it into an email to '+CFG.email;try{navigator.clipboard.writeText(body)}catch(x){}f.forEach(el=>el.value='')};
+[['fn','Enter your name'],['fe','Enter a valid email'],['fm','Message needs 10+ characters']].forEach(([id])=>$('#'+id).addEventListener('input',e=>e.target.nextElementSibling.textContent=''));
+$('#lmail').href='mailto:'+CFG.email;$('#lin').href=CFG.linkedin;$('#lgh').href=CFG.github;$('#lmail').textContent='📧 '+CFG.email;
+// scroll effects
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');const n=e.target.querySelector('[data-n]')||(e.target.dataset.n!=null?e.target:null);if(n&&!n.d){n.d=1;const T=+n.dataset.n,s=n.dataset.s||'',t0=performance.now();(function f(t){const p=Math.min((t-t0)/1500,1);n.textContent=Math.round(T*p)+s;p<1&&requestAnimationFrame(f)})(t0)}io.unobserve(e.target)}}),{threshold:.2});
+document.querySelectorAll('.rv').forEach(e=>io.observe(e));
+addEventListener('scroll',()=>{const h=document.documentElement;$('#bar').style.width=scrollY/(h.scrollHeight-innerHeight)*100+'%';$('#top').classList.toggle('show',scrollY>500)});
+$('#top').onclick=()=>scrollTo({top:0,behavior:'smooth'});
+addEventListener('mousemove',e=>{const c=$('#cur');c.style.left=e.clientX+'px';c.style.top=e.clientY+'px';mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+// neural net hero
+let mx=0,my=0;const cv=$('#net'),cx=cv.getContext('2d');let nodes=[];
+function rs(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;nodes=Array.from({length:Math.min(70,cv.width/14)},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:Math.random()-.5,vy:Math.random()-.5,z:Math.random()*.8+.2}))}rs();addEventListener('resize',rs);
+(function tick(){cx.clearRect(0,0,cv.width,cv.height);nodes.forEach(n=>{n.x=(n.x+n.vx*.4+cv.width)%cv.width;n.y=(n.y+n.vy*.4+cv.height)%cv.height});
+nodes.forEach((a,i)=>{const ax=a.x+mx*40*a.z,ay=a.y+my*40*a.z;for(let j=i+1;j<nodes.length;j++){const b=nodes[j],bx=b.x+mx*40*b.z,by=b.y+my*40*b.z,d=Math.hypot(ax-bx,ay-by);if(d<130){cx.strokeStyle=`rgba(79,157,255,${.35*(1-d/130)})`;cx.beginPath();cx.moveTo(ax,ay);cx.lineTo(bx,by);cx.stroke()}}cx.fillStyle=C;cx.beginPath();cx.arc(ax,ay,1.5+a.z*1.5,0,6.283);cx.fill()});requestAnimationFrame(tick)})();
+</script></body></html>
